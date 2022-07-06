@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html><!-- This stuff is just setting up a canvas on the HTML document.-->
+<head>
+    <title>boilerplate</title>
+    <style>
+    </style>
+</head>
+<body>
+<table></tr><td>
+<canvas id='myCanvas'></canvas>
+</td><td>
+    <p><input id='scale' type='range' oninput='slider(this)'/>
+        <span id='scaleL'>scale:...</span></p>
+    <p><input id='eyesSize' type='range' oninput='slider(this)'/>
+        <span id='eyesSizeL'>eyesSize:...</span></p>
+    <p><input id='eyesH' type='range' oninput='slider(this)'/>
+        <span id='eyesHL'>eyesH:...</span></p>
+    <p><input id='eyesV' type='range' oninput='slider(this)'/>
+        <span id='eyesVL'>eyesV:...</span></p>
+    <p><input id='dialation' type='range' oninput='slider(this)'/>
+        <span id='dialationL'>dialation:...</span></p>
+    <p><input id='eyeLV' type='range' oninput='slider(this)'/>
+        <span id='eyeLVL'>eyesLV:...</span></p>
+    <p><input id='eyeRH' type='range' oninput='slider(this)'/>
+        <span id='eyeRHL'>eyesRH:...</span></p>
+    <p><input id='eyeRV' type='range' oninput='slider(this)'/>
+        <span id='eyeRVL'>eyesRV:...</span></p>
+</tr></table>
+
+<script>
+
+class MazeGuy {
+    constructor(context) {
+        this.ctx = context;
+        this.scale = 50;
+        this.eyesSize = 50;
+        this.eyes = {x:0,y:0,l:{x:0,y:0},r:{x:0,y:0}};
+        this.pupils = {l:{x:0,y:0},r:{x:0,y:0},d:0.3};
+    }
+    draw() {
+        let ctx = this.ctx;
+        let canvas = ctx.canvas;
+        ctx.save();
+        ctx.translate(canvas.width/2,canvas.height/2);
+
+        ctx.scale(this.scale/canvas.width*10,this.scale/canvas.width*10);
+        //ctx.translate(-100,-100);
+
+        //console.log(ctx);
+        ctx.fillStyle = 'rgb(255,128,0)';
+        ctx.fillRect(-100,-70,200,171);
+        const leftEye = new Path2D();
+        const rightEye = new Path2D();
+        let leftEyeCoord = {x:this.eyes.x+this.eyesSize*0.925,
+                       y:this.eyes.y-40};
+        let rightEyeCoord = {x:this.eyes.x-this.eyesSize*0.925,
+                                                  y:this.eyes.y-40};
+        leftEye.arc(leftEyeCoord.x,
+                    leftEyeCoord.y,
+                    this.eyesSize*0.9,
+                    0,2*Math.PI);
+        rightEye.arc(rightEyeCoord.x,
+                    rightEyeCoord.y,
+                     this.eyesSize*0.9,
+                     0,2*Math.PI);
+        ctx.fillStyle = 'rgb(255,255,255)';
+
+        ctx.fill(leftEye);
+
+        ctx.fill(rightEye);
+        ctx.lineWidth=10;
+        ctx.stroke(leftEye);
+        ctx.stroke(rightEye);
+        const leftPupil = new Path2D();
+        const rightPupil = new Path2D();
+        leftPupil.arc(leftEyeCoord.x*1.3-15,
+                    leftEyeCoord.y*1.3+5,
+                    this.eyesSize*this.pupils.d,
+                    0,2*Math.PI);
+        leftPupil.arc(rightEyeCoord.x*1.3+15,
+                    rightEyeCoord.y*1.3+5,
+                    this.eyesSize*this.pupils.d,
+                    0,2*Math.PI);
+        ctx.fillStyle = 'rgb(0,0,0)';
+
+        ctx.fill(leftPupil);
+
+        ctx.fill(rightPupil);
+        ctx.restore();
+    }
+}
+
+const canvas = document.getElementById('myCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = 500;
+canvas.height = 500;
+let mazeGuy = new MazeGuy(ctx);
+
+
+
+function update() {
+    ctx.save();
+    ctx.fillStyle='rgb(0,0,0)';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    mazeGuy.draw();
+    ctx.restore();
+}
+
+function slider(e) {
+    document.getElementById(e.id+'L').innerHTML = e.id + ": " + e.value;
+    switch(e.id) {
+        case ("scale"): mazeGuy.scale = e.value;break;
+        case ("eyesSize"): mazeGuy.eyesSize = 60+(e.value-50)*0.2;break;
+        case ("eyesH"): mazeGuy.eyes.x = e.value-50;break;
+        case ("eyesV"): mazeGuy.eyes.y = e.value-50;break;
+        case ("dialation"): mazeGuy.pupils.d = e.value*0.005+.16;break;
+    }
+    update();
+}
+
+
+
+update();
+
+
+//Now the javascript ends, the rest is HTML.
+</script>
+</body>
+</html>

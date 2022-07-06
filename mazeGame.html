@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<!--
+It's Not Pacman
+Alpha Release 0.3
+Covers most basic gameplay.  One mode of play, no instructions.
+This is a minimum working model release.
+
+Introduction: Some ideas:
+
+Talked with K, here's some ideas:
+ - You're on the edge of satisfying or addictive.  Need to make levels complete and return to the menu.  The reoccuring new levels is a problem.
+ - Make the animations and effects less frantic.  More chill.
+ - Needs to have music and sound, just like you envision.
+
+
+TODO List
+ - Features:
+ - Create workable menu objects.
+ - Organize a standard flow for updating objects and drawing objects.
+ - Make a level editor, and a file format for mazes.  Also, a way to wrap mazes into a playlist thingy.
+
+ - Completed: done: Maze rendering to image
+              done: Only draw maze on resize and new level.
+              done: Clean up the pathfinding algorithm. (It's the bottleneck)
+              done: rework redundant code
+              done: Organize timers into a single game loop
+              done: Create a game object to hold global junk.
+              done: split up the rendering loop.
+              done: Remove vec2d object and cell object.
+
+ - Known Bugs: When entering a new level, the first piece of gold is not picked up.
+-->
+
+<html><head><title>
+It's Not Pacman
+</title><style>
+html,body {margin: 0 !important;padding: 0 !important;}
+body {background-color:#222222;overflow: hidden;}
+</style></head><body><canvas id="canvas"></canvas>
+<script src= "./includes/engine.js" ></script>
+<script src= "./includes/layer.js" ></script>
+<script src= "./includes/maze.js" ></script>
+<script src= "./includes/player.js" ></script>
+<script src= "./includes/menu.js" ></script>
+<script src= "./includes/main.js" ></script>
+</script></body></html>

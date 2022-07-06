@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html><!-- This stuff is just setting up a canvas on the HTML document.-->
+<head>
+    <title>boilerplate</title>
+    <style>
+    </style>
+</head>
+<body>
+<table></tr><td>
+<canvas id='myCanvas'></canvas>
+</td><td>
+    <h1> sizes </h1>
+    <p><input id='scale' type='range' oninput='slider(this)'/>
+        <span id='scaleL'>scale:...</span>
+    <input id='eyesSize' type='range' oninput='slider(this)'/>
+        <span id='eyesSizeL'>eyesSize:...</span>
+    <input id='dialation' type='range' oninput='slider(this)'/>
+            <span id='dialationL'>dialation:...</span></p>
+    <h1> focus </h1>
+    <p><input id='eyesH' type='range' oninput='slider(this)'/>
+        <span id='eyesHL'>eyesH:...</span>
+    <input id='eyesV' type='range' oninput='slider(this)'/>
+        <span id='eyesVL'>eyesV:...</span>
+    <input id='eyesS' type='range' oninput='slider(this)'/>
+        <span id='eyesSL'>eyesS:...</span></p>
+    <h1> pupils </h1>
+    <p><input id='pupilMag' type='range' oninput='slider(this)'/>
+        <span id='pupilMagL'>pupilMag:...</span>
+    <input id='focus' type='range' oninput='slider(this)'/>
+        <span id='focusL'>focus:...</span>
+    <input id='derp' type='range' oninput='slider(this)'/>
+        <span id='derpL'>derp:...</span></p>
+    <h1> eyebrows </h1>
+    <p><input id='lpt1' type='range' oninput='slider(this)'/>
+        <span id='lpt1L'>eyesRH:...</span>
+    <input id='lpt2' type='range' oninput='slider(this)'/>
+        <span id='lpt2L'>eyesRH:...</span>
+    <input id='angle' type='range' oninput='slider(this)'/>
+        <span id='angleL'>angle:...</span></p>
+    <p><input id='rpt1' type='range' oninput='slider(this)'/>
+        <span id='rpt1L'>eyesRH:...</span>
+    <input id='rpt2' type='range' oninput='slider(this)'/>
+        <span id='rpt2L'>eyesRV:...</span></p>
+
+    <h1> breath </h1>
+    <input id='breath' type='range' oninput='slider(this)'/>
+        <span id='breathL'>breath:...</span></p>
+</tr></table>
+<div id="params"></div>
+<script>
+
+//Eyebrows!
+/*
+Cubic bezier curve.
+Start at 0,0, last point is a vector from the starting point.
+Eyebrow position is determined by a translation.
+The position of the middle control points are relative to the line.
+.
+
+To do this: translate to the inner part of the eyebrow.
+Rotate, and scale x,y
+Plot bezier curve: 0,0; %,height; %,height; 1,0;
+
+*/
+
+
+
+class MazeGuy {
+    constructor(context) {
+        this.ctx = context;
+        this.scale = 50;
+        this.eyesSize = 50;
+        this.eyes = {x:0,y:0,spread:50};
+        this.pupils = {d:0.3,mag:0.1,focus:0,derp:0};
+        this.brows = {length:75,spread:10,angle:-0.2,pts:{l1:-10,l2:-10,r1:-9,r2:-11}};
+        this.breath = 0;
+    }
+    draw() {
+        let ctx = this.ctx;
+        let canvas = ctx.canvas;
+        ctx.save();
+        ctx.translate(canvas.width/2,canvas.height/2);
+        ctx.scale(this.scale/canvas.width*10,this.scale/canvas.width*10);
+
+        // Allocate for the paths.
+        const eye = new Path2D();
+        const pupil = new Path2D();
+        eye.arc(0,0,this.eyesSize*0.9,0,2*Math.PI);
+        pupil.arc(0,0,this.eyesSize*this.pupils.d,0,2*Math.PI);
+
+        //Translate for left eye.
+        ctx.save();
+        ctx.translate(this.eyes.x*(1-this.pupils.mag)-this.eyes.spread,this.eyes.y*(1-this.pupils.mag)-10);
+        ctx.lineWidth = 10;
+        ctx.fillStyle = 'rgb(255,255,255)';
+        ctx.fill(eye);
+        ctx.stroke(eye);
+        ctx.translate(this.eyes.x*(this.pupils.mag+0.1)-this.pupils.focus,this.eyes.y*(0.1+this.pupils.mag)+this.pupils.derp);
+        ctx.fillStyle = 'rgb(0,0,0)';
+        ctx.globalCompositeOperation = 'source-atop';
+        ctx.fill(pupil);
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(this.eyes.x*(1-this.pupils.mag)+this.eyes.spread,this.eyes.y*(1-this.pupils.mag)-10);
+        ctx.lineWidth = 10;
+        ctx.fillStyle = 'rgb(255,255,255)';
+        ctx.fill(eye);
+        ctx.stroke(eye);
+        ctx.translate(this.eyes.x*(this.pupils.mag+0.1)+this.pupils.focus,this.eyes.y*(0.1+this.pupils.mag)-this.pupils.derp);
+        ctx.fillStyle = 'rgb(0,0,0)';
+        ctx.globalCompositeOperation = 'source-atop';
+        ctx.fill(pupil);
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(this.eyes.x*(1-this.pupils.mag)+this.brows.spread,-75);
+        ctx.rotate(this.brows.angle);
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+        ctx.bezierCurveTo(this.brows.length*0.33,this.brows.pts.l1,this.brows.length*0.66,this.brows.pts.l2,this.brows.length,0);
+        ctx.lineWidth = 10;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = 'rgb(0,0,0)';
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(this.eyes.x*(1-this.pupils.mag)-this.brows.spread,-75);
+        ctx.scale(-1,1);
+        ctx.rotate(this.brows.angle);
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+        ctx.bezierCurveTo(this.brows.length*0.33,this.brows.pts.r1,this.brows.length*0.66,this.brows.pts.r2,this.brows.length,0);
+        ctx.lineWidth = 10;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = 'rgb(0,0,0)';
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.globalCompositeOperation = 'destination-over';
+        ctx.fillStyle = 'rgb(255,128,0)';
+        ctx.fillRect(-100+this.breath/2,-70,200-this.breath,171+this.breath);
+
+        ctx.restore();
+    }
+}
+
+const canvas = document.getElementById('myCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = 500;
+canvas.height = 500;
+let mazeGuy = new MazeGuy(ctx);
+
+canvas.addEventListener('mousemove',function(e) {
+    mazeGuy.eyes.x = (e.x/512-0.5)*100;
+    mazeGuy.eyes.y = (e.y/512-0.5)*100;
+    update();
+});
+
+function update() {
+    ctx.save();
+    //ctx.fillStyle='rgb(0,0,0)';
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    mazeGuy.draw();
+    ctx.restore();
+}
+
+function slider(e) {
+    document.getElementById(e.id+'L').innerHTML = e.id + ": " + e.value;
+    switch(e.id) {
+        case ("scale"): mazeGuy.scale = e.value;break;
+        case ("eyesSize"): mazeGuy.eyesSize = 60+(e.value-50)*0.2;break;
+        case ("eyesH"): mazeGuy.eyes.x = e.value-50;break;
+        case ("eyesV"): mazeGuy.eyes.y = e.value-50;break;
+        case ("eyesS"): mazeGuy.eyes.spread = e.value*0.75;break;
+        case ("dialation"): mazeGuy.pupils.d = e.value*0.005+.16;break;
+        case ("pupilMag"): mazeGuy.pupils.mag = e.value*0.01;break;
+        case ("focus"): mazeGuy.pupils.focus = e.value*0.5-25;break;
+        case ("derp"): mazeGuy.pupils.derp = e.value*0.5-25;break;
+        case ("angle"): mazeGuy.brows.angle = e.value/50-1;break;
+        case ("lpt1"): mazeGuy.brows.pts.l1 = e.value/2-25;break;
+        case ("lpt2"): mazeGuy.brows.pts.l2 = e.value/2-25;break;
+        case ("rpt1"): mazeGuy.brows.pts.r1 = e.value/2-25;break;
+        case ("rpt2"): mazeGuy.brows.pts.r2 = e.value/2-25;break;
+        case ("breath"): mazeGuy.breath = e.value/10-5;break;
+    }
+    update();
+    document.getElementById('params').innerHTML= JSON.stringify(mazeGuy);
+}
+
+
+
+update();
+
+
+//Now the javascript ends, the rest is HTML.
+</script>
+</body>
+</html>
